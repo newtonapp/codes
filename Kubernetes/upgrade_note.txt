@@ -1,0 +1,159 @@
+[root@kube-master1 ~]# kubectl version --short
+Client Version: v1.17.17
+Server Version: v1.17.17
+[root@kube-master1 ~]#
+
+yum --showduplicate list kubeadm | expand
+
+kubeadm.x86_64                       1.18.0-0 
+
+yum install -y kubeadm-1.18.0-0.x86_64
+
+kubeadm version
+
+
+[root@kube-master1 ~]# kubeadm version
+kubeadm version: &version.Info{Major:"1", Minor:"18", GitVersion:"v1.18.0", GitCommit:"9e991415386e4cf155a24b1da15becaa390438d8", GitTreeState:"clean", BuildDate:"2020-03-25T14:56:30Z", GoVersion:"go1.13.8", Compiler:"gc", Platform:"linux/amd64"}
+[root@kube-master1 ~]#
+
+[root@kube-master1 ~]# kubectl get no
+NAME           STATUS   ROLES    AGE   VERSION
+kube-master1   Ready    master   20h   v1.17.17
+kube-master2   Ready    master   20h   v1.17.17
+kube-w1        Ready    <none>   20h   v1.17.17
+[root@kube-master1 ~]#
+root@kube-master1 ~]#
+[root@kube-master1 ~]# kubectl cordon kube-master1
+node/kube-master1 cordoned
+[root@kube-master1 ~]# kubectl get no
+NAME           STATUS                     ROLES    AGE   VERSION
+kube-master1   Ready,SchedulingDisabled   master   20h   v1.17.17
+kube-master2   Ready                      master   20h   v1.17.17
+kube-w1        Ready                      <none>   20h   v1.17.17
+[root@kube-master1 ~]#
+
+
+kubeadm upgrade plan
+kubeadm upgrade apply v1.18.0-0
+ 
+
+ [root@kube-master1 ~]#  kubeadm upgrade apply v1.18.0
+[upgrade/config] Making sure the configuration is correct:
+[upgrade/config] Reading configuration from the cluster...
+[upgrade/config] FYI: You can look at this config file with 'kubectl -n kube-system get cm kubeadm-config -oyaml'
+[preflight] Running pre-flight checks.
+[upgrade] Running cluster health checks
+[upgrade/version] You have chosen to change the cluster version to "v1.18.0"
+[upgrade/versions] Cluster version: v1.17.17
+[upgrade/versions] kubeadm version: v1.18.0
+[upgrade/confirm] Are you sure you want to proceed with the upgrade? [y/N]: y
+
+[upgrade/successful] SUCCESS! Your cluster was upgraded to "v1.18.0". Enjoy!
+
+[upgrade/kubelet] Now that your control plane is upgraded, please proceed with upgrading your kubelets if you haven't already done so.
+[root@kube-master1 ~]#
+
+
+yum install -y kubelet-1.18.0 kubectl-1.18.0 
+
+systemctl daemon-reload
+systemctl restart kubelet
+systemctl status kubelet
+
+kubectl uncordon kube-master1
+
+[root@kube-master1 ~]# kubectl get node
+NAME           STATUS                     ROLES    AGE   VERSION
+kube-master1   Ready,SchedulingDisabled   master   20h   v1.18.0
+kube-master2   Ready                      master   20h   v1.17.17
+kube-w1        Ready                      <none>   20h   v1.17.17
+[root@kube-master1 ~]# kubectl uncordon kube-master1
+node/kube-master1 uncordoned
+[root@kube-master1 ~]#
+
+[root@kube-master1 ~]# kubectl get node
+NAME           STATUS   ROLES    AGE   VERSION
+kube-master1   Ready    master   20h   v1.18.0
+kube-master2   Ready    master   20h   v1.17.17
+kube-w1        Ready    <none>   20h   v1.17.17
+[root@kube-master1 ~]# kubectl version --short
+Client Version: v1.18.0
+Server Version: v1.18.0
+[root@kube-master1 ~]# rpm -qa|grep -i kube*
+kubectl-1.18.0-0.x86_64
+kubeadm-1.18.0-0.x86_64
+kubernetes-cni-0.8.7-0.x86_64
+kubelet-1.18.0-0.x86_64
+[root@kube-master1 ~]#
+
+
+
+
+
+###################################################
+###################################################
+Master node-2
+
+yum install -y kubeadm-1.18.0-0.x86_64
+
+kubectl cordon kube-master2
+
+kubeadm upgrade node
+
+yum install -y kubelet-1.18.0 kubectl-1.18.0 
+
+systemctl daemon-reload
+systemctl restart kubelet
+systemctl status kubelet
+
+kubectl uncordon kube-master1
+
+kubectl get node
+kubeadm version
+
+kubectl version --short
+
+rpm -qa|grep -i kube*
+
+###################################################
+###################################################
+
+#### Upgrade worker nodes
+
+[root@kube-w1 pods]# kubectl drain kube-w1 --ignore-daemonsets
+node/kube-w1 cordoned
+evicting pod "coredns-684f7f6cb4-gxz48"
+evicting pod "nginx-6db489d4b7-gnck5"
+evicting pod "nginx-deployment-574b87c764-dv8cc"
+evicting pod "nginx-deployment-574b87c764-jtmx9"
+evicting pod "nginx-deployment-574b87c764-x4qfn"
+pod/nginx-deployment-574b87c764-x4qfn evicted
+pod/nginx-6db489d4b7-gnck5 evicted
+pod/nginx-deployment-574b87c764-dv8cc evicted
+pod/nginx-deployment-574b87c764-jtmx9 evicted
+pod/coredns-684f7f6cb4-gxz48 evicted
+node/kube-w1 evicted
+[root@kube-w1 pods]#
+
+
+yum install -y kubeadm-1.18.0-0.x86_64
+
+# Upgrade the kubelet configuration 
+
+kubeadm upgrade node
+
+yum install -y kubelet-1.18.0 kubectl-1.18.0 
+
+systemctl daemon-reload
+systemctl restart kubelet
+systemctl status kubelet
+
+kubectl uncordon kube-w1
+
+[root@kube-w1 pods]# kubectl get no
+NAME           STATUS   ROLES    AGE   VERSION
+kube-master1   Ready    master   21h   v1.18.0
+kube-master2   Ready    master   21h   v1.18.0
+kube-w1        Ready    <none>   21h   v1.18.0
+[root@kube-w1 pods]#
+

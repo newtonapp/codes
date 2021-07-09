@@ -1,0 +1,263 @@
+
+####Set up a Highly Available Kubernetes Cluster using kubeadm Load Balancer 	
+#### Server Requirements 
+loadbalancer 	    172.16.93.202 	Linux 	1G /CPU 1
+Master 	kmaster1 	172.16.93.203 	Linux 	2G /CPU 2
+Master 	kmaster2 	172.16.93.205 	Linux 	2G /CPU 2
+Worker 	kworker1 	172.16.93.204 	Linux 	1G /CPU 1
+
+=====================================================
+### two ways to Set up load balancer node
+## you can chose any one s/w to configure LB for K8s
+1.haproxy
+  [OR]
+2.ngnix
+
+## Frist will look into Haproxy
+## login Loadbalancer Server.
+
+### Disable Firewall and selinux
+
+systemctl stop firewalld
+systemctl disable firewalld
+
+### Install haproxy for loadbalancer
+## yum install epel-release
+## yum install haproxy
+
+### Configure haproxy
+### append following entires in end of haproxy.cfg file
+
+vi /etc/haproxy/haproxy.cfg 
+
+frontend kubernetes-frontend
+    bind 172.16.93.202:6443
+    mode tcp
+    option tcplog
+    default_backend kubernetes-backend
+
+backend kubernetes-backend
+    mode tcp
+    option tcp-check
+    balance roundrobin
+    server kmaster1 172.16.93.203:6443 check fall 3 rise 2
+    server kmaster2 172.16.93.205:6443 check fall 3 rise 2
+
+
+### Start haproxy service
+
+systemctl start haproxy
+
+### Test the proxy
+
+yum install nc -y
+
+nc -v LOAD_BALANCER_IP PORT
+=====================================================
+         Ngnix Loadbalancer	
+=====================================================
+### install ngnix s/w
+
+yum install nginx
+
+## Start service
+
+systemctl start nginx
+
+## Nginx configuration.
+
+## Create directory for loadbalancing config.
+
+mkdir -p /etc/nginx/tcp.conf.d/
+
+## Add this directory path to the nginx config file /etc/nginx/nginx.conf
+
+vi /etc/nginx/nginx.conf
+# including directory for tcp load balancing
+include /etc/nginx/tcp.conf.d/*.conf;
+
+
+### create config for api-server loadbalancing
+
+vi /etc/nginx/tcp.conf.d/apiserver.conf
+
+stream {
+        upstream apiserver_read {
+             server 192.168.30.5:6443;                     #--> control plane node 1 ip and kube-api port
+             server 192.168.30.6:6443;                     #--> control plane node 2 ip and kube-api port
+        }
+        server {
+                listen 6443;                               # --> port on which load balancer will listen
+                proxy_pass apiserver_read;
+        }
+}
+
+
+### Reload the config
+
+nginx -s reload
+
+
+### Test the proxy
+
+yum install nc -y
+
+nc -v LOAD_BALANCER_IP PORT
+
+=====================================================
+    Kubernetes Configuration
+=====================================================
+
+### Disable swap on kubernetes masters and worker nodes
+
+swapoff -a
+Remove swap line in /etc/fstab
+=====================================================
+### run following commands on kubernetes master and worker nodes
+#### Update sysctl settings for Kubernetes networking
+
+vi /etc/sysctl.d/kubernetes.conf
+net.bridge.bridge-nf-call-ip6tables = 1
+net.bridge.bridge-nf-call-iptables = 1
+
+sysctl --system
+=====================================================
+### Install Kubernets/ docker engine
+
+### Create Kubernetes repo file in kubernetes master and worker nodes
+
+cat /etc/yum.repos.d/kubernetes.repo
+[kubernetes]
+name=Kubernetes
+baseurl=https://packages.cloud.google.com/yum/repos/kubernetes-el7-x86_64
+enabled=1
+gpgcheck=1
+repo_gpgcheck=1
+gpgkey=https://packages.cloud.google.com/yum/doc/yum-key.gpg https://packages.cloud.google.com/yum/doc/rpm-package-key.gpg
+
+# yum install docker
+# yum install kubeadm=1.19.2-00 kubelet=1.19.2-00 kubectl=1.19.2-00
+
+systemctl start docker
+systemctl enable docker
+systemctl enable kubelet
+
+### Note: Do not start kubelet service manually
+### Kubeadm init command will start kubelet
+
+######################################################
+On the Kubernetes master node1
+######################################################
+
+kubeadm init --control-plane-endpoint="Loadbalancer_IP_ADDRESS:6443" --upload-certs --apiserver-advertise-address=Master_Node-1_IP --pod-network-cidr=172.16.99.0/16
+
+kubeadm init --control-plane-endpoint="172.16.93.202:6443" --upload-certs --apiserver-advertise-address=172.16.93.203 --pod-network-cidr=172.16.99.0/16
+
+=======================================
+OUT-PUT of above command( trimmed o/p):-
+=======================================
+
+Your Kubernetes control-plane has initialized successfully!
+
+To start using your cluster, you need to run the following as a regular user:
+
+  mkdir -p $HOME/.kube
+  sudo cp -i /etc/kubernetes/admin.conf $HOME/.kube/config
+  sudo chown $(id -u):$(id -g) $HOME/.kube/config
+
+Alternatively, if you are the root user, you can run:
+
+  export KUBECONFIG=/etc/kubernetes/admin.conf
+
+You should now deploy a pod network to the cluster.
+Run "kubectl apply -f [podnetwork].yaml" with one of the options listed at:
+  https://kubernetes.io/docs/concepts/cluster-administration/addons/
+
+You can now join any number of the control-plane node running the following command on each as root:
+
+  kubeadm join 172.16.93.202:6443 --token ksp1qu.juwxik6ka2nyptrx \
+        --discovery-token-ca-cert-hash sha256:ffaafb577af73a75f04b149826c6b4edff0fea4c204d685c3bad9d292aed5325 \
+        --control-plane --certificate-key c823a5fdb3568b1e70da3bffa3a262521ad2a162853b56de184418f5ddd53b58 
+
+Please note that the certificate-key gives access to cluster sensitive data, keep it secret!
+As a safeguard, uploaded-certs will be deleted in two hours; If necessary, you can use
+"kubeadm init phase upload-certs --upload-certs" to reload certs afterward.
+
+Then you can join any number of worker nodes by running the following on each as root:
+
+kubeadm join 172.16.93.202:6443 --token ksp1qu.juwxik6ka2nyptrx \
+        --discovery-token-ca-cert-hash sha256:ffaafb577af73a75f04b149826c6b4edff0fea4c204d685c3bad9d292aed5325
+[root@kube-master1 ~]#
+============================
+OUT-PUT END
+============================
+
+#### Login the kubernetes master node-2
+
+systemctl start docker
+systemctl enable docker
+systemctl enable kubelet
+######
+verify ip_forward contents set to 1, if not set it to 1
+######
+To verify run below command 
+cat /proc/sys/net/ipv4/ip_forward 
+######
+####################
+
+### Join master node2  with following command.
+### login master node2 
+### --apiserver-advertise-address=Master_Node-2_IP 
+
+kubeadm join 172.16.93.202:6443 --token ksp1qu.juwxik6ka2nyptrx --discovery-token-ca-cert-hash sha256:ffaafb577af73a75f04b149826c6b4edff0fea4c204d685c3bad9d292aed5325  --control-plane --certificate-key c823a5fdb3568b1e70da3bffa3a262521ad2a162853b56de184418f5ddd53b58 --apiserver-advertise-address=172.16.93.205 
+
+##########
+[root@kube-master2 sysctl.d]# kubectl get no
+NAME           STATUS     ROLES                  AGE   VERSION
+kube-master1   NotReady   control-plane,master   19h   v1.21.1
+kube-master2   NotReady   control-plane,master   18h   v1.21.1
+[root@kube-master2 sysctl.d]#
+##########
+Final touch up, bring node status to Ready, we need to install network. 
+
+### install network 
+#kubectl apply -f https://raw.githubusercontent.com/coreos/flannel/master/Documentation/kube-flannel.yml
+
+[root@kube-master1 sysctl.d]# kubectl get no
+NAME           STATUS   ROLES                  AGE   VERSION
+kube-master1   Ready    control-plane,master   19h   v1.21.1
+kube-master2   Ready    control-plane,master   18h   v1.21.1
+ 
+  
+[root@kube-master1 sysctl.d]# kubectl get pod -n kube-system -o wide
+NAME                                   READY   STATUS    RESTARTS   AGE   IP              NODE           NOMINATED NODE   READINESS GATES
+coredns-558bd4d5db-2wk7p               1/1     Running   0          19h   172.16.0.2      kube-master1   <none>           <none>
+coredns-558bd4d5db-zg8mz               1/1     Running   0          19h   172.16.1.2      kube-master2   <none>           <none>
+etcd-kube-master1                      1/1     Running   0          19h   172.16.93.203   kube-master1   <none>           <none>
+etcd-kube-master2                      1/1     Running   0          18h   172.16.93.205   kube-master2   <none>           <none>
+kube-apiserver-kube-master1            1/1     Running   0          19h   172.16.93.203   kube-master1   <none>           <none>
+kube-apiserver-kube-master2            1/1     Running   0          18h   172.16.93.205   kube-master2   <none>           <none>
+kube-controller-manager-kube-master1   1/1     Running   0          19h   172.16.93.203   kube-master1   <none>           <none>
+kube-controller-manager-kube-master2   1/1     Running   0          18h   172.16.93.205   kube-master2   <none>           <none>
+kube-flannel-ds-2mx2d                  1/1     Running   0          18h   172.16.93.203   kube-master1   <none>           <none>
+kube-flannel-ds-dbxmc                  1/1     Running   0          18h   172.16.93.205   kube-master2   <none>           <none>
+kube-proxy-6kpgc                       1/1     Running   0          18h   172.16.93.205   kube-master2   <none>           <none>
+kube-proxy-km4vq                       1/1     Running   0          19h   172.16.93.203   kube-master1   <none>           <none>
+kube-scheduler-kube-master1            1/1     Running   0          19h   172.16.93.203   kube-master1   <none>           <none>
+kube-scheduler-kube-master2            1/1     Running   0          18h   172.16.93.205   kube-master2   <none>           <none>
+[root@kube-master1 sysctl.d]#
+
+### #################
+Now Join Worker Node
+### #################
+
+kubeadm join 172.16.93.202:6443 --token ksp1qu.juwxik6ka2nyptrx  --discovery-token-ca-cert-hash sha256:ffaafb577af73a75f04b149826c6b4edff0fea4c204d685c3bad9d292aed5325
+
+
+[root@kube-master2 sysctl.d]# kubectl get no
+NAME           STATUS   ROLES                  AGE   VERSION
+kube-master1   Ready    control-plane,master   19h   v1.21.1
+kube-master2   Ready    control-plane,master   19h   v1.21.1
+kube-w1        Ready    <none>                 18h   v1.21.1
+
+

@@ -1,0 +1,286 @@
+-> No replica set configured for pods ??
+-> what if worker node down  ??
+-> what happens to pods ??
+-> how to failover pods ??
+-> Don't expect failback commands (No failback options in k8s)
+
+### Let's get answers.
+->->->->->->->->->->->->->->->->->->->->->->->->->->->->->->
+
+If the node down and came back online immediately, then the kubectl process starts and the pods come back online
+
+if the node was down for more than 5 minutes, then the pods are terminated from that node, Well, kubernetes considers them as dead.
+
+####
+default timeout value 
+####
+Kube-controller-manager --pod-eviction-timeout=5m0s
+#########
+### Update kubeadm package with yum 
+## Note: Don't upgrade major version, go with minor version as recomended by kubernetes.
+## currently installed version v1.17.17
+
+[root@kube-master1 ~]# kubectl version --short
+Client Version: v1.17.17
+Server Version: v1.17.17
+[root@kube-master1 ~]#
+
+#### Get list of availble versions to update
+### Login Master node
+
+yum --showduplicates list kubeadm | expand
+
+###############
+ABOVE_yum_COMMAND-OUT-PUT_Trimmed 
+###############
+Installed Packages
+kubeadm.x86_64                       1.17.17-0                       @kubernetes
+Available Packages
+kubeadm.x86_64                       1.17.15-0                       kubernetes
+kubeadm.x86_64                       1.17.16-0                       kubernetes
+kubeadm.x86_64                       1.17.17-0                       kubernetes
+kubeadm.x86_64                       1.18.0-0                        kubernetes
+kubeadm.x86_64                       1.18.1-0                        kubernetes
+kubeadm.x86_64                       1.18.2-0                        kubernetes
+kubeadm.x86_64                       1.18.3-0                        kubernetes
+###############
+OUT-PUT_END 
+###############
+
+backup all resource configuration
+
+kubectl get all --all-namespaces -o yaml > all-deploy-service.yaml
+
+######################
+## marks a node unschedulable.
+
+### cordon or marked unschedulable. means no pods can be scheduled on this node until you specifically remove the restriction.( its kind of Freeze the node)
+######################
+######################
+[root@kube-master1 ~]# kubectl cordon kube-master1
+node/kube-master1 cordoned
+[root@kube-master1 ~]#
+[root@kube-master1 ~]# kubectl get no
+NAME           STATUS                     ROLES    AGE   VERSION
+kube-master1   Ready,SchedulingDisabled   master   20h   v1.17.17
+kube-master2   Ready                      master   20h   v1.17.17
+kube-w1        Ready                      <none>   20h   v1.17.17
+[root@kube-master1 ~]#
+######################
+######################
+
+### So next availble version is "1.18.0-0" as per above out-put
+### Install it on Master first.
+
+yum install kubeadm-1.18.0-0.x86_64
+
+######################
+######################
+
+### Verify installed version with following cmds.
+
+### kubeadm version
+
+[root@kube-master1 ~]# kubeadm version
+kubeadm version: &version.Info{Major:"1", Minor:"18", GitVersion:"v1.18.0", GitCommit:"9e991415386e4cf155a24b1da15becaa390438d8", GitTreeState:"clean", BuildDate:"2020-03-25T14:56:30Z", GoVersion:"go1.13.8", Compiler:"gc", Platform:"linux/amd64"}
+[root@kube-master1 ~]#
+NAME           STATUS                     ROLES    AGE   VERSION
+kube-master1   Ready,SchedulingDisabled   master   20h   v1.17.17
+kube-master2   Ready                      master   20h   v1.17.17
+kube-w1        Ready                      <none>   20h   v1.17.17
+[root@kube-master1 ~]#
+
+######################
+######################
+
+### we can also see stable version with following cmd.
+
+kubeadm upgrade plan
+
+### above cmd shows stable version info but not require to follow if you know which version is stable.
+##
+### Upgrade cluster with next availble version
+### Note: we are going to upgrade version 1.18.0-0, while appling you need specify "v" before version like below
+
+### kubeadm upgrade apply v1.18.0
+
+###################################################
+###################################################
+[root@kube-master1 ~]#  kubeadm upgrade apply v1.18.0
+[upgrade/config] Making sure the configuration is correct:
+[upgrade/config] Reading configuration from the cluster...
+[upgrade/config] FYI: You can look at this config file with 'kubectl -n kube-system get cm kubeadm-config -oyaml'
+[preflight] Running pre-flight checks.
+[upgrade] Running cluster health checks
+[upgrade/version] You have chosen to change the cluster version to "v1.18.0"
+[upgrade/versions] Cluster version: v1.17.17
+[upgrade/versions] kubeadm version: v1.18.0
+[upgrade/confirm] Are you sure you want to proceed with the upgrade? [y/N]: y
+
+[upgrade/successful] SUCCESS! Your cluster was upgraded to "v1.18.0". Enjoy!
+
+[upgrade/kubelet] Now that your control plane is upgraded, please proceed with upgrading your kubelets if you haven't already done so.
+[root@kube-master1 ~]#
+###################################################
+###################################################
+### Upgrade kubelet and kubectl packages with yum.
+
+yum install kubelet-1.18.0-0.x86_64 kubectl-1.18.0-0.x86_64
+
+###########
+Restart kubelet service
+###########
+systemctl stop kubelet
+systemctl daemon-reload
+systemctl start kubelet
+
+###################################################
+###################################################
+### now verify installed version
+
+[root@kube-master1 ~]# kubectl get node
+NAME           STATUS   ROLES    AGE   VERSION
+kube-master1   Ready    master   20h   v1.18.0
+kube-master2   Ready    master   20h   v1.17.17
+kube-w1        Ready    <none>   20h   v1.17.17
+[root@kube-master1 ~]# kubectl version --short
+Client Version: v1.18.0
+Server Version: v1.18.0
+[root@kube-master1 ~]# rpm -qa|grep -i kube*
+kubectl-1.18.0-0.x86_64
+kubeadm-1.18.0-0.x86_64
+kubernetes-cni-0.8.7-0.x86_64
+kubelet-1.18.0-0.x86_64
+[root@kube-master1 ~]#
+
+#######################
+###Need to uncordon it, so that pods can be scheduled on it again ( its like a unfreeze)
+### ********* remember the pods that were moved to the other nodes, don’t automatically fall back.
+######################
+
+[root@kube-master1 ~]# kubectl get node
+NAME           STATUS                     ROLES    AGE   VERSION
+kube-master1   Ready,SchedulingDisabled   master   20h   v1.18.0
+kube-master2   Ready                      master   20h   v1.17.17
+kube-w1        Ready                      <none>   20h   v1.17.17
+
+[root@kube-master1 ~]# kubectl uncordon kube-master1
+node/kube-master1 uncordoned
+[root@kube-master1 ~]#
+
+[root@kube-master1 ~]# kubectl get node
+NAME           STATUS   ROLES    AGE   VERSION
+kube-master1   Ready    master   20h   v1.18.0
+kube-master2   Ready    master   20h   v1.17.17
+kube-w1        Ready    <none>   20h   v1.17.17
+[root@kube-master1 ~]#
+
+##################################################################
+#### SO upgrade master node Done!
+##################################################################
+
+#######################################################################################
+## If you have multi master setup, next we need to upgrade other master node 
+######################################################################################
+
+### Upgrade Master node-2
+### Login Master node-2
+
+kubectl cordon kube-master2
+
+yum install -y kubeadm-1.18.0-0.x86_64
+
+#### Upgrade node with following command 
+### kubeadm upgrade node ( "node" its not nodename, just node ( key word )
+
+kubeadm upgrade node
+
+yum install -y kubelet-1.18.0 kubectl-1.18.0 
+
+systemctl daemon-reload
+systemctl restart kubelet
+systemctl status kubelet
+
+kubectl get node
+
+kubeadm version
+
+kubectl version --short
+
+rpm -qa|grep -i kube*
+
+kubectl uncordon kube-master1
+
+
+#######################################################################################
+#######################################################################################
+
+### Now will update worker nodes
+#################################
+
+####  Prepare the node for maintenance by marking it unschedulable and evicting the workloads:
+#### The upgrade procedure on worker nodes should be executed one node at a time
+#### Move workload (pods) to other  worknode.
+### drain the node means? ""|| the pods are gracefully terminated from the current node, they're recreated on another node. ||""
+
+kubectl drain workernode-1 --ignore-daemonsets
+
+[root@kube-w1 pods]# kubectl drain kube-w1 --ignore-daemonsets
+node/kube-w1 cordoned
+evicting pod "coredns-684f7f6cb4-gxz48"
+evicting pod "nginx-6db489d4b7-gnck5"
+evicting pod "nginx-deployment-574b87c764-dv8cc"
+evicting pod "nginx-deployment-574b87c764-jtmx9"
+evicting pod "nginx-deployment-574b87c764-x4qfn"
+pod/nginx-deployment-574b87c764-x4qfn evicted
+pod/nginx-6db489d4b7-gnck5 evicted
+pod/nginx-deployment-574b87c764-dv8cc evicted
+pod/nginx-deployment-574b87c764-jtmx9 evicted
+pod/coredns-684f7f6cb4-gxz48 evicted
+node/kube-w1 evicted
+[root@kube-w1 pods]#
+
+#################################
+#### 
+
+yum install -y kubeadm-1.18.0-0.x86_64
+
+#######
+#################################
+### upgrades the local kubelet configuration
+
+## kubeadm upgrade node
+
+####################################
+#### Upgrade the kubelet and kubectl
+
+yum install kubelet-1.18.0-0.x86_64 kubectl-1.18.0-0.x86_64
+
+### Restart the kubelet:
+
+systemctl stop kubelet
+systemctl daemon-reload
+systemctl start kubelet
+
+####################################
+### Need to uncordon it, so that pods can be scheduled on it again ( its like a unfreeze)
+### ********* remember the pods that were moved to the other nodes, don’t automatically fall back.
+
+kubectl uncordon kube-w1
+
+[root@kube-w1 pods]# kubectl get no
+NAME           STATUS   ROLES    AGE   VERSION
+kube-master1   Ready    master   21h   v1.18.0
+kube-master2   Ready    master   21h   v1.18.0
+kube-w1        Ready    <none>   21h   v1.18.0
+[root@kube-w1 pods]#
+
+
+
+
+
+
+
+
+
+
