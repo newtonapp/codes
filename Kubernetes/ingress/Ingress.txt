@@ -1,0 +1,40 @@
+1.H1+
+2.Service OM portal
+3.Cloud Admin portal
+4.vCenter Login
+5.Ticketing tool
+6.Accoops
+7.AD account
+
+VPN user credentials.
+
+Name : ashok_m
+Password : !KmVp2V?
+
+H1+   
+URL: https://console.piclouddns.com/
+Username  : Pi_Ashok
+Password : Welcome@123
+
+Cloud Admin portal  
+URL : https://console.piclouddns.com/
+Username  :  Ashok_Admin
+Password : Welcome@123
+
+Ticketing tool  - 
+URL  :  https://ticketing.pidatacenters.com/
+Username  :  Ashok
+Username  :  Welcome@123
+
+AD account  
+IP : 10.128.22.20
+Port  : 3333
+Username : Pidc\Pi00313
+Password : Welcome@123
+
+VMware 100Gig environment.
+
+URL: https://172.20.102.20/ui/
+
+Username: Ashok
+Password: Welcome@123

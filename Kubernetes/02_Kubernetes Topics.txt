@@ -1,0 +1,100 @@
+Kubernetes Setup
+ physical node
+ VM's
+ EKS(AWS)
+ AKS(AZURE)
+ GKS (GCP)
+ 
+Kubernetes-upgrades
+ Master  
+ workerNode
+
+Kubernetes cluster HA for Master (multi Master setup)
+
+### Pod?
+1.Pods are the smallest deployable units of computing that you can create and manage in Kubernetes.
+2.A Pod is a group of one or more containers,
+
+### Deployment
+1.deployment is a resource object in Kubernetes 
+2.A deployment allows you to describe an application’s life cycle, such as which images to use for the app, the number of pods there should be.
+
+### ReplicaSet
+1.The ReplicaSet ensures that a specified number of Pod replicas are running at any time.
+
+### StatefulSet
+1. StatefulSet maintains a sticky identity for each of their Pods.
+2. Stable, unique network identifiers.
+3. graceful deployment and scaling.
+4. StatefulSets  require a Headless Service to be responsible for the network identity of the Pods
+5. will get dns records for pods 
+6. we can communicate pod through DNS names (dns name like: $(service name).$(namespace).svc.cluster.local  "nginx.default.svc.cluster.local", 
+
+### Daemonset
+1. A DaemonSet ensures that all Nodes run a copy of a Pod.
+
+### updates images
+
+### rollback
+
+### Services
+## ClusterIP  -
+ 1.  basically we use this type of service when we want to expose a service to other pods within the same cluster. This service is accessed using kubernetes proxy.
+
+## NodePort
+1. we use this type of service when we want to expose a service with in the network(subnet) default ports  30000-32767) 
+ 
+## LoadBalancer
+1. we use this type of service when we want to expose a service outside of cluster or public network.
+ 
+## Headless Service
+1. kube-proxy does not handle these Services
+2. Setting clusterIP variable to None declares a headless service.
+3. 
+
+## IngressController
+1. an Ingress is an object that allows access to your Kubernetes services from outside the Kubernetes cluster. 
+2. You configure access by creating a collection of rules that define which inbound connections reach which services. 
+3. This lets you consolidate your routing rules into a single resource.
+4. it can expose multiple services under the same IP address
+## IngressResources
+1. ingress resources. in Kubernetes are used to proxy layer 7 traffic to containers in the cluster.
+2. it can expose multiple services under the same IP address
+
+Kubernetes-Dashboard
+
+### Namespace in Kubernetes
+1. Namespaces are Kubernetes objects which partition a single Kubernetes cluster into multiple virtual clusters.
+
+Storage
+PV
+PVC
+StorageClass
+
+### ConfigMap
+1. A ConfigMap is an API object that lets you store configuration for other objects to use.
+2. its like a variables for other objects
+
+### Secret
+1. Secret is an object that contains a small amount of sensitive data such as a password, a token, or a key
+
+### ServiceAccounts
+1. In Kubernetes, service accounts are used to provide an identity for pods. 
+2. Pods that want to interact with the API server will authenticate with a particular service account. By default, applications will authenticate as the default service account in the namespace they are running in. This means, for example, that an application running in the test namespace will use the default service account of the test namespace.
+
+Roles
+Role bindings
+Cluster Role
+Cluster Role bining
+
+Logs monitoring
+events
+
+NetworkPlugins
+NetworkPolices
+
+Deploy pods via Genkins
+
+Provision AKS/EKS/GCP through Terraform
+
+GIT

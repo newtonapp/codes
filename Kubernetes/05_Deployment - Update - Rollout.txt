@@ -1,0 +1,96 @@
+Deployment - Update - Rollout
+-----------------------------
+
+kubectl rollout status deployment/myapp-deployment
+
+### show you the revisions and history of our deployment.
+
+$ kubectl rollout status deployment/myapp-deployment
+
+#### Upgrade option
+
+
+-> There are two types of deployment strategies.
+
+-> for example you have five replicas of your web application instance deployed.
+
+One way to upgrade these to a newer version is to destroy all of these and then create newer version
+
+
+->  first destroy the five running instances and then deploy five new instances of the new application
+
+*************
+kubernetes deployment object creates a new replica set under the hood
+
+and starts deploying the containers there at the same time taking down the pods in the old replica set
+*************
+----------------------------------
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: myapp-deployment-update-version
+  labels:
+     app: myapp
+     type: deploy-typ
+spec:
+  replicas: 3
+  selector:
+     matchLabels:
+        type: deploy-typ
+  template:
+     metadata:
+        name: myapp-pod
+          labels:
+            app: myapp
+            type: front-end
+     spec:
+        containers:
+          - name: nginx-container
+            image: "nginx:1.16.1"
+
+------------------------------------
+
+## UNDO CHANGE # rollback
+
+kubectl rollout undo deployment/myapp-deployment
+
+
+Create > get > update > status > rollback !
+
+
+kubectl create -f deployment_myapp.yml
+
+kubectl get deployments
+
+kubectl apply -f deployment_myapp.yml
+
+kubectl rollout status deployment/myapp
+
+kubectl rollout history deployment
+
+kubectl rollout undo deployment/myapp
+
+
++++++++++++++++++++++++++++++++++++++++++
+
+if you want to create revision, then you need to record "kubectl create deployment.yml
+
+kubectl create -f deployment_pod.yml --record
+
+kubectl rollout status deployment/myapp
+
+[root@chefwork kube_yml]# kubectl rollout history  deployment/myapp-deployment
+deployment.apps/myapp-deployment
+REVISION  CHANGE-CAUSE
+1         kubectl create --filename=deployment_pod.yml --record=true
+
+[root@chefwork kube_yml]#
+
+###########
+
+record revison another way y use set image command
+@@@@
+
+kubectl set image deployment/myapp-deployment nginx-container=nginx:1.12
+

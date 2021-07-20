@@ -1,0 +1,4 @@
+EKS Users
+AWS>IAM>User>add users>
+
+attach existing policy > create policy > Visual Editor > Service > EKS

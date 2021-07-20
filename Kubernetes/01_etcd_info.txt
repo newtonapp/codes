@@ -1,0 +1,11 @@
+******ETCD:-
+
+The ETCD datastore stores information regarding the
+
+cluster such as the nodes, pods, configs, secrets, accounts, roles, bindings and others.
+
+Every information you see when you run the kubectl get command is from the ETCD server. 
+
+Every change you make to your cluster, such as adding additional nodes, deploying pods or replica sets are updated
+
+in the ETCD server. Only once it is updated in the ETCD server, is the change considered to be complete.

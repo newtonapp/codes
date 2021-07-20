@@ -1,0 +1,27 @@
+### Links
+https://www.youtube.com/watch?v=aZd0UolVwD4
+AKIAWHA5G5WGK45OHMKO
+Tv3VkjTBFwcTpZXaMTq34Z6Y6S4TPUXjLbsPW1Ji
+
+Kubernetes Setup in AWS
+
+### Gateway Server
+1.Create EC2 Instance.
+2.Install AWS CLI
+https://docs.aws.amazon.com/cli/latest/userguide/install-cliv2-linux.html
+
+3.Access AWS account from EC2 Instance.
+
+
+### EKS 
+1.Create IAM role for EKS cluster.
+2.Create a VPC for EKS.
+3.Create EKS cluster.
+4.Install and setup IAM Authenticator and Kubectl Utility in worker nodes
+5.Create IAM Role for EKS Worker nodes.
+6.create worker node.
+7.deploying container application.
+
+
+
+

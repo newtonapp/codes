@@ -1,0 +1,16 @@
+apiVersion: extensions/v1beta1
+kind: Ingress
+metadata:
+  name: ingress-rules
+spec:
+   rules:
+   - http:
+       paths:
+       - path: /wear
+         backend:
+           serviceName: apache-service
+           servicePort: 80
+       - path: /watch
+         backend:
+           serviceName: nginx-service
+           servicePort: 80

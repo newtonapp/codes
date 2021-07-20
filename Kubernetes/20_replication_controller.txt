@@ -1,0 +1,109 @@
+
+
+$$$$    Replication controller  $$$$$
+####
+Even if you have a single pod, the replication controller can help by automatically bringing up a new pod, when the existing one fails.
+#####
+
+&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&
+reason we need a replication controller is to create multiple parts to share the load across
+
+them.
+
+For example in this simple scenario we have a single pod serving a set of users. When the number of
+
+users increase we deploy additional part to balance the load across the two parts.
+
+If the demand further increases and if we were to run out of resources on the first node we could deploy
+
+additional pods across the other nodes in the cluster.
+
+As you can see the replication controller spans across multiple nodes in the cluster.
+
+It helps us balance the load across multiple pods on different nodes as well.
+
+When the demand increases.
+
+&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&
+
+# vi rc_pod_ngix.yml
+
+apiVersion: v1
+kind: ReplicationController
+metadata:
+   name: nginx-m-name
+   labels:
+       app: rc-labels-name
+       type: rc-front-end-name
+spec:
+  template:
+    metadata:
+       name: nginx-app-name
+       labels:
+         app: app-label-name
+         type: app-front-end-name
+    spec:
+       containers:
+        - name: dark-container-name
+          image: nginx
+   replicas: 4
+   
+====================================
+## create pod with 4 replicas by yml code, 
+## Run yml file with 
+kubectl create -f rc_pod_ngix.yml
+--------------------------------------------
+
+[root@chefwork kube_yml]# kubectl get pods
+NAME                      READY   STATUS             RESTARTS   AGE
+db-rc-2mk6b               1/1     Running            1          3d6h
+db-rc-2r5l5               1/1     Running            1          3d6h
+db-rc-zj9r2               1/1     Running            1          3d6h
+httpd-pod                 1/1     Running            1          2d21h
+nginx-6db489d4b7-j9jsb    1/1     Running            1          3d6h
+nginx-m-name-8dnd8        1/1     Running            0          5m32s
+nginx-m-name-b547d        1/1     Running            0          5m32s
+nginx-m-name-bl2zk        1/1     Running            0          5m32s
+nginx-m-name-vxn7z        1/1     Running            0          5m32s
+python-67f87448f5-nxqk7   0/1     CrashLoopBackOff   30         2d21h
+[root@chefwork kube_yml]#
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+[root@chefwork kube_yml]# kubectl get pod -o wide
+NAME                      READY   STATUS             RESTARTS   AGE     IP            NODE         NOMINATED NODE   READINESS GATES
+db-rc-2mk6b               1/1     Running            1          3d6h    10.244.1.13   worknode03   <none>           <none>
+db-rc-2r5l5               1/1     Running            1          3d6h    10.244.1.14   worknode03   <none>           <none>
+db-rc-zj9r2               1/1     Running            1          3d6h    10.244.1.15   worknode03   <none>           <none>
+httpd-pod                 1/1     Running            1          2d21h   10.244.2.11   worknode04   <none>           <none>
+nginx-6db489d4b7-j9jsb    1/1     Running            1          3d6h    10.244.1.16   worknode03   <none>           <none>
+nginx-m-name-8dnd8        1/1     Running            0          24m     10.244.1.18   worknode03   <none>           <none>
+nginx-m-name-b547d        1/1     Running            0          24m     10.244.2.14   worknode04   <none>           <none>
+nginx-m-name-bl2zk        1/1     Running            0          24m     10.244.1.17   worknode03   <none>           <none>
+nginx-m-name-vxn7z        1/1     Running            0          24m     10.244.2.13   worknode04   <none>           <none>
+python-67f87448f5-nxqk7   0/1     CrashLoopBackOff   34         2d21h   10.244.2.12   worknode04   <none>           <none>
+[root@chefwork kube_yml]#
+
+
+##
+### see list of replication controllers
+# kubectl get rc
+NAME           DESIRED   CURRENT   READY   AGE
+db-rc          3         3         3       4d1h
+nginx-m-name   4         4         4       20m
+[root@chefwork kubernetes.io~secret]#
+
+
+## describe about pod
+kubectl describe rc 
+kubectl describe rc  -o wide
+
+## describe about spcific pod
+kubectl describe rc nginx-m-name
+
+### if we want to increase replicaset count 3 to 5 after creation or existing one pods
+### change COUNT IN yml file and create it.
+## it will change only number of replicasets
+kubectl replace -f rc_pod_ngix.yml
+
+### one more option to increase replicaset count 3 to 5 follow 
+
+kubectl scale --replicas=6 -f rc_pod_ngix.yml

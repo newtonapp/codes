@@ -1,0 +1,116 @@
+apiVersion: extensions/v1beta1
+kind: Deployement
+metadata:
+   name: nginx-ingress-controller
+
+spec:
+   replicas: 1
+   selector:
+     matchLabels:
+       name: nginx-ingress
+   template:
+     metadata:
+       labels:
+         name: nginx-ingress
+     sepc:
+       containers:
+         - name: nginx-ingress-controller
+           image: quay.io/kubernetes-ingress-controller/nginx-ingress-controller
+       args:
+         - /nginx-ingress-controller
+         - --configmap=$(POD_NAMESPACE)/nginx-configuration
+       env:
+         - name: POD_NAME
+           valueFrom:
+           fieldRef:
+              fieldPath: metadata.name
+         - name: POD_NAMESPACE
+           valueFrom:
+             fieldRef:
+               fieldPath: metadata.namespace
+       ports:
+         - name: http
+           containerPort: 80
+         - name: https
+           containerPort: 443
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: nginx-ingress
+spec:
+  type: LoadBalancer
+  ports:
+  - port: 80
+    targetPort: 80
+    protocol: TCP
+    name: http
+  - port: 443
+    targetPort: 443
+    protocol: TCP
+    name: https
+  selector:
+    name: nginx-ingress-controller
+    
+---
+## Need to create ServiceAccount and Roles and Rolebinding.
+ 
+
+---
+
+### Ingress-resuorces
+
+apiVersion: extensions/v1beta1
+kind: Ingress 
+metadata:
+  name: ing-res
+spec:
+  backend:
+     serviceName: nginx-ingress
+     servicePort: 80
+
+
+### Ingress with rules
+
+apiVersion: extensions/v1beta1
+kind: Ingress
+metadata:
+  name: ingress-wear-watch
+spec:
+  rules:
+  - http:
+      paths: 
+      - path: /wear
+        backend:
+          serviceName: wear-service   ### already service created for wear apps
+          servicePort: 80
+      - path: /watch
+        backend:
+          serviceName: watch-service  ### already service created for watch apps
+          servicePort: 80
+
+
+#### 3rd type of ingress resource configuration 
+#### i have 2 application ((A.wear || B.watch ))
+#### route trafic over domain names
+
+#### url base ingress resource
+
+apiVersion: extensions/v1beta1
+kind: Ingress
+metadata:
+  name: ingress-apps-wear-watch
+spec:
+  rules:
+  - host: wear.my-online-store.com
+    http:
+      paths:
+      - backend:
+           serviceName: wear-service
+           servicePort: 80
+   - host: watch.my-online-store.com
+     http:
+       paths:
+       - backend:
+           serviceName: watch-service
+           servicePort: 80

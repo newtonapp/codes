@@ -1,0 +1,8 @@
+https://techexpert.tips/kubernetes/kubernetes-dashboard-ldap-authentication/
+
+updatedb
+locate docker.service
+vi /etc/systemd/system/multi-user.target.wants/docker.service
+
+Add the following configuration at the end of the item named: EXECSTART
+--exec-opt native.cgroupdriver=systemd

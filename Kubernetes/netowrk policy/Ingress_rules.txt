@@ -1,0 +1,75 @@
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: db-policy
+spec:
+   podSelector: 
+      mathLabels:
+        role: db-pod
+   plicyTypes:
+    - Ingress
+   ingress:
+   - from:
+     - podSelector:
+          matchLabels:
+            name: api-pod
+      ports:
+      - protocol: TCP
+        port: 3306
+
+=================================
+
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: db-policy
+spec:
+   podSelector: 
+      mathLabels:
+        role: db-pod
+   plicyTypes:
+    - Ingress
+   ingress:
+   - from:
+     - podSelector:
+          matchLabels:
+            name: api-pod
+        namespaceSelector:
+           mathLabels:
+             name: prod-namespce
+        - ipBlock:
+             cidr: 192.168.1.10/32
+      ports:
+      - protocol: TCP
+        port: 3306
+====================================
+## ipBlock for out side of kubernetes clusters, if your pod want to communicate with outside k8s network we have to add ipBlock 
+
+
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: db-policy
+spec:
+   podSelector: 
+      mathLabels:
+        role: db-pod
+   plicyTypes:
+    - Ingress
+    - Egress
+   ingress:
+   - from:
+     - podSelector:
+          matchLabels:
+            name: api-pod
+      ports:
+      - protocol: TCP
+        port: 3306
+    egress:
+    - to:
+       - ipBlock:
+            cidr: 192.168.1.10/32  
+
+        ports: 
+        - protocol: TCP
+          port: 80

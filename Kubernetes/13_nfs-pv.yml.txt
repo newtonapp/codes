@@ -1,0 +1,87 @@
+apiVersion: v1
+kind: PersistentVolume
+metadata:
+  name: nfs-pv1
+  labels:
+     type: local
+spec:
+  storageClassName: manual
+  capacity:
+    storage: 200Mi
+  accessModes:
+    - ReadWriteOnce
+  nfs:
+    server: 192.168.1.105
+    path: /data/nfs/pv1
+
+---
+
+apiVersion: v1
+kind: PersistentVolume
+metadata:
+  name: nfs-pv2
+  labels:
+     type: local
+spec:
+  storageClassName: manual
+  capacity:
+    storage: 200Mi
+  accessModes:
+    - ReadWriteOnce
+  nfs:
+    server: 192.168.1.105
+    path: /data/nfs/pv2
+
+---
+
+apiVersion: v1
+kind: PersistentVolume
+metadata:
+  name: nfs-pv3
+  labels:
+     type: local
+spec:
+  storageClassName: manual
+  capacity:
+    storage: 200Mi
+  accessModes:
+    - ReadWriteOnce
+  nfs:
+    server: 192.168.1.105
+    path: /data/nfs/pv3
+
+---
+
+apiVersion: v1
+kind: PersistentVolume
+metadata:
+  name: nfs-pv4
+  labels:
+     type: local
+spec:
+  storageClassName: manual
+  capacity:
+    storage: 200Mi
+  accessModes:
+    - ReadWriteOnce
+  nfs:
+    server: 192.168.1.105
+    path: /data/nfs/pv4
+
+---
+
+apiVersion: v1
+kind: PersistentVolume
+metadata:
+  name: nfs-pv5
+  labels:
+     type: local
+spec:
+  storageClassName: manual
+  capacity:
+    storage: 200Mi
+  accessModes:
+    - ReadWriteOnce
+  nfs:
+    server: 192.168.1.105
+    path: /data/nfs/pv5

@@ -1,0 +1,38 @@
+---
+apiVerison: apps/v1
+kind: StatefulSet
+metadata:
+  name: my-db
+  labels: mysqldb
+spec:
+  template:
+    metadata:
+      labels:
+        app: mysqldb-prod
+    spec:
+      containers:
+      - name: mysql
+        image: mysql
+  serviceName: mysql-serv
+  replicas: 3
+  selector:
+     mathLabels:
+        app: mysqldb
+
+###
+#subdomain: mangos      
+#hostname: mango-pod
+###
+---
+
+apiVersion: v1
+kind: Service
+metadata:
+   name: mysql-serv
+spec:
+   ports:
+   - port: 3306
+   selector:
+      app: mysqldb
+   clusterIP: None
+     

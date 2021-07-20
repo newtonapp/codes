@@ -1,0 +1,47 @@
+PODs:---
+
+Create Pod
+
+apiVersion: v1
+kind: Pod
+metadata:
+   name: web-pod
+   labels:
+       app: nginx
+       type: front-end-name
+spec: 
+  containers:
+      - name: nginx-container
+        image: nginx
+
+kubectl create -f pod-definition.yml
+
+kubectl delete deployment nginx
+
+kubectl get pods --show-labels
+
+###You can add a label to the pod as:
+kubectl label pods labelex owner=michael
+
+kubectl get pods
+kubectl get replicationcontroller
+kubectl get replicaset
+
+
+----------------------------------------
+apiVersion: v1
+kind: Pod
+metadata:
+   name: web-pod
+   labels:
+       app: nginx
+       type: front-end-name
+       costcenter: tools
+       location: Ind-hyd
+spec: 
+  containers:
+      - name: nginx-container
+        image: nginx
+
+      - name: backend-container
+        image: apache

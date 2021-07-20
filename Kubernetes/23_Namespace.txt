@@ -1,0 +1,49 @@
+Namespace:
+
+kubectl get pods --namespace=kube-system
+
+kubectl create -f pod-creation.yml --namespace=dev
+
+else:
+metadata section we can specify "namespace" 
+==========-=====
+metadata:
+  name: myapp-pod
+  namespace: dev
+==========-=====
+
+apiVersion: v1
+kind: Namespace
+metadata:
+   name: dev
+
+kubectl create -f namespace.yml
+
+kubectl create namespace ns-dev
+==========-=====
+make dev namespace is default:-
+
+kubectl config set-context $(kubectl config current-context) --namespace=dev
+
+++++++++++++++
+
+kubectl get pods --all-namespaces
+
+======================
+
+===by using namespace we can set resource quota to namespace
+
+apiVersion: v1
+kind: ResourceQuota
+metadata:
+  name: compute-quota
+  namespace: dev
+
+spec:
+  hard:
+    pods: "10"
+    requests.cpu: "4"
+    requests.memory: "6Gi"
+    limits.cpu: "10"
+    limits.memory: 10Gi
+

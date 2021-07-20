@@ -1,0 +1,49 @@
+1.Create IAM role for EKS cluster 
+2.Create a VPC for EKS 
+3.Create EKS cluster
+4.Install and setup IAM Authenticator and Kubectl Utility
+5.Create IAM Role for EKS Worker nodes( IAM > create role > search key eks> select policy || 1.AmazonEKS_CNI_Plicy || 2.Amazon EKS WorkerNodePlicy || search again with key word ec2container  select 3.AmazonEX2ContainerRegisttryReadOnly ||
+6.create worker node
+7.deploying application
+
+aws sts get-caller-identity
+
+aws eks update-kubeconfig  --name geclus --region ap-south-1
+
+export KUBECONFIG=~/.kube/con 0.
+ fig
+
+aws eks update-kubeconfig --name eksway1 --region us-east-2 --role-arn arn:aws:iam::427410517388:role/eksway
+
+arn:aws:iam::427410517388:user/eksu1
+
+
+arn:aws:iam::427410517388:role/eksway
+
+arn:aws:iam::427410517388:role/eksway
+
+aws eks update-kubeconfig  --name ekscluster --region us-east-2 
+
+
+
+
+    Access Key ID:
+    AKIAWHA5G5WGIVP3ONGO
+    Secret Access Key:
+    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
+
+eksctl create cluster --name <my-cluster> --version <1.19> --region us-west-2  --role-arn <arn:aws:iam::111122223333:role/eks-service-role --resources-vpc-config subnetIds=subnet-6782e71e,subnet-e7e761ac,securityGroupIds=sg-6979fe18 securityGroupIds=sg-6979fe18
+
+aws eks create-cluster --name prod \
+--role-arn arn:aws:iam::012345678910:role/eks-service-role-AWSServiceRoleForAmazonEKS-J7ONKE3BQ4PI \
+--resources-vpc-config subnetIds=subnet-6782e71e,subnet-e7e761ac,securityGroupIds=sg-6979fe18
+
+
+eksctl create cluster --name eksforce --version 1.18 --region west-2 --nodegroup-name eks-grp-nodes --node-type t2.micro --nodes 2
+
+
+
+eksctl delete cluster --name eks_cluster_name
+
+
+ endpointPublicAccess=<true>

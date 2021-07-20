@@ -1,0 +1,160 @@
+https://kubernetes.io/docs/concepts/storage/persistent-volumes/#claims-as-volumes
+
+#### Directory Base Storage 
+### not recommended for pord
+### local pods only access data
+### if you are using replicaSet  not recommanded 
+### utill you have directory replication tools
+### Like: StorageOS,etc... (software base storages for k8s)
+
+apiVersion: v1
+kind: Pod
+metadata:
+  name: random-number-gen
+spec:
+  containers:
+  - image: httpd
+    name: httpd
+    volumeMounts:
+    - mountPath: /opt
+      name: data-vol
+  volumes:
+  - name: data-vol
+    hostPath:
+        path: /data/green
+
+------------------------
+[root@master1 kube]# kubectl get pod  random-number-gen
+NAME                READY   STATUS    RESTARTS   AGE
+random-number-gen   1/1     Running   0          13m
+[root@master1 kube]#
+kubectl exec random-number-gen -it -- df -h
+kubectl exec random-number-gen -it -- ls /opt/
+kubectl exec random-number-gen -it -- touch /opt/test{1..100}
+bectl exec random-number-gen -it -- ls /opt/
+
+
+
+####################
+####################
+### not recommended for pord
+### local pods only access data
+### if you are using replicaSet  not recommanded 
+### utill you have directory replication tools
+### Like: StorageOS,etc... (software base storage for k8s)
+### PersistentVolumes
+---
+apiVersion: v1
+kind: PersistentVolume
+metadata:
+   name: pv-vg1
+spec:
+  accessModes:
+     - ReadWriteOnce
+  capacity:
+     storage: 1Gi
+  hostPath:
+     path: /data/pv1
+  
+---
+#### PersistentVolume
+#### AWS ElasticBlockStore
+####
+apiVersion: v1
+kind: PersistentVolume
+metatdata:
+   name: pv-vg1
+spec:
+  accessModes:
+     - ReadWriteOce
+  capacity:
+     storage: 1Gi
+  awsElasticBlockStore:
+     volumeID: vol-id
+     fsType: ext4
+
+######
+## PersistentVolumeClaim
+######
+
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: myclaim
+spec:
+  accessModes:
+     - ReadWriteOnce
+  resources:
+      requests:
+        storage: 500Mi
+  selector:
+    matchLabels:
+       name: my-vg1
+
+
+
+apiVersion: v1
+kind: Pod
+metadata:
+  name: mypod
+spec:
+  containers:
+    - name: myfrontend
+      image: nginx
+      volumeMounts:
+      - mountPath: "/var/www/html"
+        name: mypd
+  volumes:
+    - name: mypd
+      persistentVolumeClaim:
+        claimName: myclaim
+
+
+###########
+###########
+
+## Dynamic Provisioning
+## create storage class 
+## SC depends on cloud provider
+## in dynamic provisioning you need not to create PV's manualy, SC will create 
+## 
+
+apiVersion: storage.k8s.io/v1
+kind: StorageClass
+metadata:
+  name: google-storage
+provisioner: kubernetes.io/gcp-pd
+
+
+---
+
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: my-claim
+spec:
+  accessModes
+     - ReadWriteOnce
+  storageClassName: google-storage
+  resources:
+     requests:
+        storage: 1Gi
+
+---
+
+apiVersion: v1
+kind: Pod
+metadata: 
+  name: rnd
+spec:
+  containers:
+   - image: nginx
+     name: nginx
+     volumeMounts:
+     - mountPath: /opt
+       name: data-vol1
+   volumes:
+   - name: data-volume
+     persistentVolumeClaim:
+         claimName: my-claim
+     

@@ -1,0 +1,51 @@
+2
+
+First of all run this command:
+
+kubectl get -n namespace services
+Above command will return output like this:
+
+ NAME            TYPE       CLUSTER-IP       EXTERNAL-IP   PORT(S)         AGE
+backend   NodePort   10.100.44.154         <none>          9400:3003/TCP   13h   
+frontend        NodePort   10.107.53.39     <none>        3000:30017/TCP   13h
+It is clear from the above output that External IPs are not assigned to the services yet. To assign External IPs to backend service run the following command.
+
+ kubectl patch svc backend -p '{"spec":{"externalIPs":["192.168.0.194"]}}'
+and to assign external IP to frontend service run this command.
+
+ kubectl patch svc frontend -p '{"spec":{"externalIPs":["192.168.0.194"]}}'
+Now get namespace service to check either external IPs assignment:
+
+kubectl get -n namespace services
+We get an output like this:
+
+NAME     TYPE     CLUSTER-IP     EXTERNAL-IP    PORT(S)             AGE
+backend  NodePort 10.100.44.154  192.168.0.194  9400:3003/TCP       13h
+frontend NodePort 10.107.53.39   192.168.0.194  3000:30017/TCP      13h
+Cheers!!! Kubernetes External IPs are now assigned .\\\
+
+
+
+kubectl patch svc voting-service -p '{"spec": {"type": "LoadBalancer", "externalIPs":["192.168.0.101"]}}'
+#############################################################
+[root@chefwork micro_services]# kubectl get services -o wide
+NAME             TYPE           CLUSTER-IP      EXTERNAL-IP   PORT(S)        AGE   SELECTOR
+kubernetes       ClusterIP      10.96.0.1       <none>        443/TCP        24d   <none>
+voting-service   LoadBalancer   10.100.76.119   <pending>     80:30590/TCP   10m   app=demo-voting-app,name=voting-app-lab
+[root@chefwork micro_services]#
+[root@chefwork micro_services]#
+[root@chefwork micro_services]# kubectl patch svc voting-service -p '{"spec": {"type": "LoadBalancer", "externalIPs":["192.168.0.101"]}}'
+service/voting-service patched
+[root@chefwork micro_services]# kubectl get services -o wide
+NAME             TYPE           CLUSTER-IP      EXTERNAL-IP     PORT(S)        AGE   SELECTOR
+kubernetes       ClusterIP      10.96.0.1       <none>          443/TCP        24d   <none>
+voting-service   LoadBalancer   10.100.76.119   192.168.0.101   80:30590/TCP   13m   app=demo-voting-app,name=voting-app-lab
+[root@chefwork micro_services]#
+#############################################################
+
+
+
+spec:
+  type: LoadBalancer
+  externalIPs:
+  - 192.168.0.10

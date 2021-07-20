@@ -1,0 +1,53 @@
+apiVersion: rbac.authorization.k8s.io/v1
+kind: Role
+metadata:
+  name: dev-role
+  namespace: default
+rules:
+- apiGroups: [""]
+  resources: ["pod"]
+  verbs: ["list", "get", "create", "update", "delete"]
+- apiGroups: [""]
+  resources: ["ConfigMap"]
+  verbs: ["create"]
+
+---
+
+#####You want to give access to a user to specifc pods.
+#####
+apiVersion: rbac.authorization.k8s.io/v1
+kind: Role
+metadata:
+  name: dev-role
+rules:
+- apiGroups: [""]
+  resources: ["pod"]
+  resources: ["alpha-pod", "delta-pod"]
+  verbs: ["list", "get", "create", "update", "delete"]
+- apiGroups: [""]
+  resources: ["ConfigMap"]
+  verbs: ["create"]
+---
+
+apiVersion: rbac.authorization.k8s.io/v1
+kind: RoleBinding
+metadata:
+  name: dev-user-binding
+subjects:
+- kind: User
+  name: devu1
+  apiGroup: rbac.authorization.k8s.io
+roleRef:
+  kind: Role
+  name: dev-role
+  apiGroup: rbac.authorization.k8s.io
+
+
+Check auth status
+root@master1 kube]# kubectl auth can-i create pod
+yes
+[root@master1 kube]#
+
+kubectl auth can-i create pods --as devu1
+
+kubectl auth can-i create pods --as devu1 --namespace default

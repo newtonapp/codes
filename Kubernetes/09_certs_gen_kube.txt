@@ -1,0 +1,9 @@
+### Generate private key
+openssl genrsa -out server.key 2048
+
+### Generate csr
+openssl req -new -key server.key -subj "/CN=kube-admin" -out server.csr
+
+### sign certificates
+openssl x509 -req -in server.csr -CA ca.crt -CAkey -out server.crt 
+

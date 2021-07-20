@@ -1,0 +1,40 @@
+#### NODE PORT
+apiVersion: v1
+kind: Services
+metadata:
+   name: web-app-service
+   labels:
+     name: web-app-service
+
+spec:
+  type: NodePort
+  ports:
+   - targetPort: 80
+     port: 80
+     nodePort: 30005
+  selector:
+      app: web-app-pod
+      type: front-end-app
+
+========================
+kubectl create -f services.yml
+
+kubectl get services
+
+curl http:/192.168.1.2:30005
+=============================
+##### CLUSTER IP
+
+apiVersion: v1
+kind: Services
+metadata:
+   name: back-end
+
+spec:
+  type: ClusterIP
+  ports:
+   - targetPort: 80
+     port: 80
+  selector:
+      app: web-app-pod
+      type: front-end-app

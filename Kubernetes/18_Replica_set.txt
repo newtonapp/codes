@@ -1,0 +1,48 @@
+# vi rc_set_pod_ngix.yml
+
+apiVersion: v1
+kind: ReplicaSet
+metadata:
+   name: httpd-m-name
+   labels:
+       app: rcs-labels-name
+       type: rcs-front-end-name
+spec:
+  template:
+    metadata:
+       name: httpd-app-name
+       labels:
+         app: happ-label-name
+         type: happ-front-end-name
+    spec:
+       containers:
+        - name: dark-container-name
+          image: httpd
+   replicas: 4
+   selector:
+       matchlabels:
+          type: happ-front-end-named
+
+----------------------------------
+
+
+
+## describe about pod
+kubectl describe rc 
+kubectl describe rc  -o wide
+
+## describe about spcific pod
+kubectl describe rc nginx-m-name
+
+### if we want to increase replicaset count 3 to 5 after creation or existing one pods
+### change COUNT IN yml file and create it.
+## it will change only number of replicasets
+kubectl replace -f rc_pod_ngix.yml
+
+### one more option to increase replicaset count 3 to 5 follow 
+
+kubectl scale --replicas=6 -f rc_pod_ngix.yml
+
+kubectl scale --replicas=6 replicaset replicaset-name
+
+kubectl delete replicaset replicaset-name
