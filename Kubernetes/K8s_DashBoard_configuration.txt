@@ -1,0 +1,85 @@
+Create Kube-Dashboard
+
+kubectl apply -f https://raw.githubusercontent.com/kubernetes/dashboard/v2.0.0/aio/deploy/recommended.yaml
+
+### Change service type 
+## edit kubernetes-dashboard service 
+## run edit command, it will open in vim editor there find "type" (default value would be ClusterIP), change it from ClusterIP to LoadBalancer, that's it!
+
+[root@kuber-master Desktop]# kubectl get svc -n kubernetes-dashboard
+NAME                        TYPE        CLUSTER-IP       EXTERNAL-IP   PORT(S)    AGE
+dashboard-metrics-scraper   ClusterIP   10.107.152.73    <none>        8000/TCP   24m
+kubernetes-dashboard        ClusterIP   10.100.155.101   <none>        443/TCP    13m
+[root@kuber-master Desktop]# kubectl edit svc kubernetes-dashboard -n kubernetes-dashboard
+service/kubernetes-dashboard edited
+[root@kuber-master Desktop]# 
+
+### after edit output
+
+[root@kuber-master Desktop]# kubectl describe svc kubernetes-dashboard -n kubernetes-dashboard
+Name:                     kubernetes-dashboard
+Namespace:                kubernetes-dashboard
+Labels:                   k8s-app=kubernetes-dashboard
+Annotations:              <none>
+Selector:                 k8s-app=kubernetes-dashboard
+Type:                     LoadBalancer
+IP Families:              <none>
+IP:                       10.100.155.101
+IPs:                      10.100.155.101
+LoadBalancer Ingress:     36.255.254.248
+Port:                     <unset>  443/TCP
+TargetPort:               8443/TCP
+NodePort:                 <unset>  31159/TCP
+Endpoints:                10.244.2.5:8443
+Session Affinity:         None
+External Traffic Policy:  Cluster
+Events:
+  Type    Reason  Age   From                Message
+  ----    ------  ----  ----                -------
+  Normal  Type    24s   service-controller  ClusterIP -> LoadBalancer
+[root@kuber-master Desktop]# 
+
+### To get secret key run following command 
+### check kube link for updated dashboard  "https://kubernetes.io/docs/tasks/access-application-cluster/web-ui-dashboard/"
+
+kubectl -n kubernetes-dashboard get secret $(kubectl -n kubernetes-dashboard get sa/kubernetes-dashboard -o jsonpath="{.secrets[0].name}") -o go-template="{{.data.token | base64decode}}"
+eyJhbGciOiJSUzI1NiIsImtpZCI6IlpXaThsTzlrck9VX0xNUmt1a3RPM3hHMHdfNlNJZXRFaHg5M3R2TGV3LW8ifQ.eyJpc3MiOiJrdWJlcm5ldGVzL3NlcnZpY2VhY2NvdW50Iiwia3ViZXJuZXRlcy5pby9zZXJ2aWNlYWNjb3VudC9uYW1lc3BhY2UiOiJrdWJlcm5ldGVzLWRhc2hib2FyZCIsImt1YmVybmV0ZXMuaW8vc2VydmljZWFjY291bnQvc2VjcmV0Lm5hbWUiOiJrdWJlcm5ldGVzLWRhc2hib2FyZC10b2tlbi1xeHR2cCIsImt1YmVybmV0ZXMuaW8vc2VydmljZWFjY291bnQvc2VydmljZS1hY2NvdW50Lm5hbWUiOiJrdWJlcm5ldGVzLWRhc2hib2FyZCIsImt1YmVybmV0ZXMuaW8vc2VydmljZWFjY291bnQvc2VydmljZS1hY2NvdW50LnVpZCI6ImJiNDBjYjZkLTQzNGMtNDBhZi1iYWEwLWI3NDVhZGRjODUzMCIsInN1YiI6InN5c3RlbTpzZXJ2aWNlYWNjb3VudDprdWJlcm5ldGVzLWRhc2hib2FyZDprdWJlcm5ldGVzLWRhc2hib2FyZCJ9.HKGdqUUFWvsHKs4Bdwa1M5pq7M4qGDIkdd7D-89PRtQVwXoCRLHkirFBm8gyz_ZoInk1mnMZUf3buCbv_1Njs0ed-HY87Ca30LuoHzgiFmZCOCEpkA_KHbGcWrQ_cx7_jqHFTfq4ZbxVK0IRIP3f8CpO8TBjAuELwDAO3UIJQS3h1C-R6smtCKzzG1nEvUHI1yUQ-oa8r5OP21wwcvtsapTGCy-bZ8MSBrMCa1WTzEAD7ob5c1LSzx7Z_8zg2y2EZPTBwzCRyZZ8u1hPOYQZw6ytRaKo6dwF-fYTK1ys97YoRsesdRdi7QVYJ6HNz9aDNFLxZ2YFVwpfOrXwGR4C-w
+
+#######  open broswer type "loadbalancer IP"
+### https://36.255.254.248:443
+### that's it!
+
+
+
+===============
+#### Creating a Service Account
+
+cat <<EOF | kubectl apply -f -
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: admin1
+  namespace: kubernetes-dashboard
+EOF
+
+### Creating a ClusterRoleBinding
+
+cat <<EOF | kubectl apply -f -
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRoleBinding
+metadata:
+  name: admin-user
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: ClusterRole
+  name: cluster-admin
+subjects:
+- kind: ServiceAccount
+  name: admin-user1
+  namespace: kubernetes-dashboard
+EOF	
+
+kubectl -n kubernetes-dashboard get secret $(kubectl -n kubernetes-dashboard get sa/kubernetes-dashboard -o jsonpath="{.secrets[0].name}") -o go-template="{{.data.token | base64decode}}"
+
+
+

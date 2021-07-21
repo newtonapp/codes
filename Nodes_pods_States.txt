@@ -1,0 +1,49 @@
+Kubernetes Events Ingested by Sysdig
+kubernetes:
+    node:
+      - TerminatedAllPods       # Terminated All Pods      (information)
+      - RegisteredNode          # Node Registered          (information)*
+      - RemovingNode            # Removing Node            (information)*
+      - DeletingNode            # Deleting Node            (information)*
+      - DeletingAllPods         # Deleting All Pods        (information)
+      - TerminatingEvictedPod   # Terminating Evicted Pod  (information)*
+      - NodeReady               # Node Ready               (information)*
+      - NodeNotReady            # Node not Ready           (information)*
+      - NodeSchedulable         # Node is Schedulable      (information)*
+      - NodeNotSchedulable      # Node is not Schedulable  (information)*
+      - CIDRNotAvailable        # CIDR not Available       (information)*
+      - CIDRAssignmentFailed    # CIDR Assignment Failed   (information)*
+      - Starting                # Starting Kubelet         (information)*
+      - KubeletSetupFailed      # Kubelet Setup Failed     (warning)*
+      - FailedMount             # Volume Mount Failed      (warning)*
+      - NodeSelectorMismatching # Node Selector Mismatch   (warning)*
+      - InsufficientFreeCPU     # Insufficient Free CPU    (warning)*
+      - InsufficientFreeMemory  # Insufficient Free Mem    (warning)*
+      - OutOfDisk               # Out of Disk              (information)*
+      - HostNetworkNotSupported # Host Ntw not Supported   (warning)*
+      - NilShaper               # Undefined Shaper         (warning)*
+      - Rebooted                # Node Rebooted            (warning)*
+      - NodeHasSufficientDisk   # Node Has Sufficient Disk (information)*
+      - NodeOutOfDisk           # Node Out of Disk Space   (information)*
+      - InvalidDiskCapacity     # Invalid Disk Capacity    (warning)*
+      - FreeDiskSpaceFailed     # Free Disk Space Failed   (warning)*
+    pod:
+      - Pulling           # Pulling Container Image          (information)
+      - Pulled            # Ctr Img Pulled                   (information)
+      - Failed            # Ctr Img Pull/Create/Start Fail   (warning)*
+      - InspectFailed     # Ctr Img Inspect Failed           (warning)*
+      - ErrImageNeverPull # Ctr Img NeverPull Policy Violate (warning)*
+      - BackOff           # Back Off Ctr Start, Image Pull   (warning)
+      - Created           # Container Created                (information)
+      - Started           # Container Started                (information)
+      - Killing           # Killing Container                (information)*
+      - Unhealthy         # Container Unhealthy              (warning)
+      - FailedSync        # Pod Sync Failed                  (warning)
+      - FailedValidation  # Failed Pod Config Validation     (warning)
+      - OutOfDisk         # Out of Disk                      (information)*
+      - HostPortConflict  # Host/Port Conflict               (warning)*
+    replicationController:
+      - SuccessfulCreate    # Pod Created        (information)*
+      - FailedCreate        # Pod Create Failed  (warning)*
+      - SuccessfulDelete    # Pod Deleted        (information)*
+      - FailedDelete        # Pod Delete Failed  (warning)*

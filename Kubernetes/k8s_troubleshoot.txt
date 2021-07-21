@@ -1,0 +1,63 @@
+#kubeadm init  --pod-network-cidr=10.10.1.0/16 --apiserver-advertise-address=103.210.75.172,192.168.149.84
+
+#kubectl apply -f https://raw.githubusercontent.com/coreos/flannel/2140ac876ef134e0ed5af15c65e414cf26827915/Documentation/kube-flannel.yml
+
+#kubectl get pods --all-namespaces
+
+with public IP
+kubeadm config images pull
+kubeadm init --apiserver-cert-extra-sans=103.210.75.172,192.168.149.84 --pod-network-cidr=10.244.0.0/16   --apiserver-advertise-address=192.168.149.84 --control-plane-endpoint=103.210.75.172
+
+kubeadm init --apiserver-advertise-address=103.210.75.172,192.168.149.94 --apiserver-cert-extra-sans=master-node.novalocal,master-node.pidc.com --pod-network-cidr=10.244.0.0/16
+
+kubeadm init --apiserver-advertise-address=103.210.75.172,192.168.149.94
+ --apiserver-cert-extra-sans=master-node.novalocal,master-node.pidc.com --pod-network-cidr=10.244.0.0/16
+ 
+ 
+ kubeadm init --apiserver-advertise-address=103.210.75.172,192.168.149.94 --apiserver-cert-extra-sans=master-node.novalocal,master-node.pidc.com --pod-network-cidr=10.244.0.0/16
+ 
+ 
+ kubectl apply -f "https://cloud.weave.works/k8s/net?k8s-version=$(kubectl version | base64 | tr -d '\n')"
+ 
+ 
+kubeadm init --apiserver-cert-extra-sans=103.210.75.172,192.168.149.84 --pod-network-cidr=10.244.0.0/16   --apiserver-advertise-address=192.168.149.84 --control-plane-endpoint=103.210.75.172
+
+kubeadm init --pod-network-cidr=10.244.0.0/16 --apiserver-advertise-address=0.0.0.0 --apiserver-cert-extra-sans=103.210.75.172,d 
+
+endpointPublicAccess=true,endpointPrivateAccess=true
+
+kubectl create -f https://raw.githubusercontent.com/cilium/cilium/v1.8/install/kubernetes/quick-install.yaml
+
+
+kubectl apply -f "https://cloud.weave.works/k8s/net?k8s-version=$(kubectl version | base64 | tr -d '\n')"
+I
+
+    [ERROR Port-10259]: Port 10259 is in use  65374/kube-schedule
+        [ERROR Port-10257]: Port 10257 is in use   65189/kube-controll
+        [ERROR Port-10250]: Port 10250 is in use   64756/kubelet
+
+
+kubeadm init --config=/etc/kubernetes/kubeadm-config.yaml --ignore-preflight-errors=all	
+
+--advertise-address=${MASTER_IP} \
+--bind-address=${MASTER_IP} \
+--insecure-bind-address=${MASTER_IP} \
+
+kubeadm init --pod-network-cidr=192.168.0.0/16 --apiserver-advertise-address=0.0.0.0 --apiserver-cert-extra-sans=<PRIVATE_IP>[,<PUBLIC_IP>,...]
+
+
+ kubectl delete pod -n kube-system --grace-period 0 --force.
+ 
+ sudo kubeadm init --pod-network-cidr=192.168.0.0/16 --control-plane-endpoint "PUBLIC_IP:PORT"
+ 
+ kubectl apply -f "https://cloud.weave.works/k8s/net?k8s-version=$(kubectl version | base64 | tr -d '\n')"
+ 
+ 
+ 
+ $ kubectl config set-cluster demo-cluster --server=http://master.example.com:8080
+$ kubectl config set-context demo-system --cluster=demo-cluster
+$ kubectl config use-context demo-system
+$ kubectl get nodes
+
+
+kubeadm init --apiserver-cert-extra-sans=103.210.75.172,192.168.149.84 --pod-network-cidr=10.244.0.0/16   --apiserver-advertise-address=192.168.149.84 --control-plane-endpoint=103.210.75.172

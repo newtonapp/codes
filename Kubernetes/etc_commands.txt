@@ -1,0 +1,41 @@
+kubeadm init --apiserver-advertise-address=192.168.149.94 --apiserver-cert-extra-sans=master-node.novalocal --pod-network-cidr=10.244.0.0/16 --control-plane-endpoint=103.210.75.172 --cert-dir=/etc/kubernetes/pki
+
+
+kubeadm init --apiserver-cert-extra-sans=103.210.75.172,192.168.149.84,master-node.novalocal --pod-network-cidr=10.244.0.0/16   --apiserver-advertise-address=192.168.149.84 --control-plane-endpoint=103.210.75.172 
+
+
+
+kubeadm init   --apiserver-advertise-address=192.168.162.237  --pod-network-cidr=10.244.0.0/16 --control-plane-endpoint=172.19.128.44
+
+
+ kubeadm init --apiserver-cert-extra-sans=103.210.75.172,192.168.149.84,master-node.novalocal --pod-network-cidr=10.244.0.0/16   --apiserver-advertise-address=192.168.149.84 --control-plane-endpoint=103.210.75.172
+
+ kubectl apply -f https://github.com/kubernetes-sigs/metrics-server/releases/download/v0.4.0/components.yaml
+ kubectl get po -n kube-system
+ kubectl get po -n kube-system
+ wget https://github.com/kubernetes-sigs/metrics-server/releases/download/v0.4.0/components.yaml
+
+
+
+ - --tls-cert-file=/etc/kubernetes/pki/apiserver.crt
+    - --tls-private-key-file=/etc/kubernetes/pki/apiserver.key
+
+ --etcd-certfile=/etc/kubernetes/pki/apiserver-etcd-client.crt
+    - --etcd-keyfile=/etc/kubernetes/pki/apiserver-etcd-client.key
+
+ - --proxy-client-cert-file=/etc/kubernetes/pki/front-proxy-client.crt
+    - --proxy-client-key-file=/etc/kubernetes/pki/front-proxy-client.key
+
+
+check certificate
+
+kubeadm alpha certs check-expiration
+ kubeadm cofig view
+ 
+###renew certs	
+ kubeadm alpha certs renew all
+
+
+kubeadm alpha certs renew
+kubeadm alpha certs renew --csr-only
+kubeadm alpha certs view

@@ -1,0 +1,85 @@
+[root@master-node ~]#  kubectl get ns
+NAME                   STATUS        AGE
+ambassador             Active        8d
+default                Active        34d
+kube-node-lease        Active        34d
+kube-public            Active        34d
+kube-system            Active        34d
+kubernetes-dashboard   Active        4d22h
+porter-system          Terminating   20d
+sonarqube              Active        8d
+[root@master-node ~]#   kubectl apply -f https://raw.githubusercontent.com/google/metallb/v0.9.3/manifests/namespace.yaml
+namespace/metallb-system created
+[root@master-node ~]# kubectl apply -f https://raw.githubusercontent.com/google/metallb/v0.9.3/manifests/metallb.yaml
+podsecuritypolicy.policy/controller created
+podsecuritypolicy.policy/speaker created
+serviceaccount/controller created
+serviceaccount/speaker created
+clusterrole.rbac.authorization.k8s.io/metallb-system:controller created
+clusterrole.rbac.authorization.k8s.io/metallb-system:speaker created
+role.rbac.authorization.k8s.io/config-watcher created
+role.rbac.authorization.k8s.io/pod-lister created
+clusterrolebinding.rbac.authorization.k8s.io/metallb-system:controller created
+clusterrolebinding.rbac.authorization.k8s.io/metallb-system:speaker created
+rolebinding.rbac.authorization.k8s.io/config-watcher created
+rolebinding.rbac.authorization.k8s.io/pod-lister created
+daemonset.apps/speaker created
+deployment.apps/controller created
+[root@master-node ~]# kubectl create secret generic -n metallb-system memberlist --from-literal=secretkey="$(openssl rand -base64 128)"
+secret/memberlist created
+[root@master-node ~]#   kubectl get ns
+NAME                   STATUS        AGE
+ambassador             Active        8d
+default                Active        34d
+kube-node-lease        Active        34d
+kube-public            Active        34d
+kube-system            Active        34d
+kubernetes-dashboard   Active        4d22h
+metallb-system         Active        65s
+porter-system          Terminating   20d
+sonarqube              Active        8d
+[root@master-node ~]# kubectl get pods,serviceaccounts,deployments,roles,rolebindings -n metallb-system
+NAME                            READY   STATUS    RESTARTS   AGE
+pod/controller-fb659dc8-bfmlx   1/1     Running   0          42s
+pod/speaker-g5xx5               1/1     Running   0          42s
+pod/speaker-ml9jq               1/1     Running   0          42s
+pod/speaker-st9g2               1/1     Running   0          42s
+
+NAME                        SECRETS   AGE
+serviceaccount/controller   1         42s
+serviceaccount/default      1         78s
+serviceaccount/speaker      1         42s
+
+NAME                         READY   UP-TO-DATE   AVAILABLE   AGE
+deployment.apps/controller   1/1     1            1           42s
+
+NAME                                            CREATED AT
+role.rbac.authorization.k8s.io/config-watcher   2021-01-27T07:28:21Z
+role.rbac.authorization.k8s.io/pod-lister       2021-01-27T07:28:21Z
+
+NAME                                                   ROLE                  AGE
+rolebinding.rbac.authorization.k8s.io/config-watcher   Role/config-watcher   42s
+rolebinding.rbac.authorization.k8s.io/pod-lister       Role/pod-lister       42s
+[root@master-node ~]# kubectl get pods,serviceaccounts,deployments,roles,rolebindings -n metallb-system
+NAME                            READY   STATUS    RESTARTS   AGE
+pod/controller-fb659dc8-bfmlx   1/1     Running   0          47s
+pod/speaker-g5xx5               1/1     Running   0          47s
+pod/speaker-ml9jq               1/1     Running   0          47s
+pod/speaker-st9g2               1/1     Running   0          47s
+
+NAME                        SECRETS   AGE
+serviceaccount/controller   1         47s
+serviceaccount/default      1         83s
+serviceaccount/speaker      1         47s
+
+NAME                         READY   UP-TO-DATE   AVAILABLE   AGE
+deployment.apps/controller   1/1     1            1           47s
+
+NAME                                            CREATED AT
+role.rbac.authorization.k8s.io/config-watcher   2021-01-27T07:28:21Z
+role.rbac.authorization.k8s.io/pod-lister       2021-01-27T07:28:21Z
+
+NAME                                                   ROLE                  AGE
+rolebinding.rbac.authorization.k8s.io/config-watcher   Role/config-watcher   47s
+rolebinding.rbac.authorization.k8s.io/pod-lister       Role/pod-lister       47s
+[root@master-node ~]#

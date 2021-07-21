@@ -1,0 +1,39 @@
+https://github.com/vipin-k/MetalLB-for-Kubernetes-Cluster-1.19.3/blob/main/steps
+
+vi /etc/haproxy/haproxy.cfg
+
+0(( remove after #main frontend which is backup end ))
+
+frontend http_front
+  bind *:80
+  stats uri /haproxy?stats
+  default_backend http_back
+
+backend http_back
+  balance roundrobin
+  server kube <worker-node1-ip>:80
+  server kube <worker-node2-ip>:80
+  
+  ============================
+  ##start service 
+  
+  
+  kubectl create deployment nginx --image=haproxy
+kubectl create deployment nginx --image=httpd
+  
+  Github: https://github.com/justmeandopensource/kubernetes
+Nginxinc Ingress:https://github.com/nginxinc/kubernetes-ingress
+
+
+kubectl get ns
+  kubectl apply -f https://raw.githubusercontent.com/google/metallb/v0.9.3/manifests/namespace.yaml
+  kubectl apply -f https://raw.githubusercontent.com/google/metallb/v0.9.3/manifests/metallb.yaml
+  kubectl create secret generic -n metallb-system memberlist --from-literal=secretkey="$(openssl rand -base64 128)"
+  kubectl get ns
+  kubectl get pods,serviceaccounts,deployments,roles,rolebindings -n metallb-system
+  kubectl apply -f config.yaml
+  kubectl apply -f hotellb.yml
+  kubectl get ns
+  kubectl get pods -o wide --namespace hotel
+  kubectl get ingress --namespace hotel
+  kubectl get svc --namespace hotel
