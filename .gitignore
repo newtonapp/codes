@@ -30,4 +30,4 @@ override.tf.json
 # example: *tfplan*
 
 #Ignore .idea file created by IntelliJ IDEA
-**/.idea/*.xml 
+**/.idea/*.xml **/.idea/**
